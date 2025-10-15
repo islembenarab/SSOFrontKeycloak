@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { ReactiveFormsModule } from '@angular/forms';
-import {HttpClientModule, HTTP_INTERCEPTORS, provideHttpClient} from '@angular/common/http';
+import {HTTP_INTERCEPTORS, provideHttpClient} from '@angular/common/http';
 import { RouterModule, Routes } from '@angular/router';
 
 
@@ -12,6 +12,7 @@ import {DashboardComponent} from './components/dashboard-component/dashboard-com
 import {AuthGuard} from './guards/auth-guard-guard';
 import {KeycloakService} from './services/keycloak-service';
 import {AuthInterceptor} from './interceptors/auth-interceptor-interceptor';
+import {environment} from '../environments/environment';
 
 const routes: Routes = [
   { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
@@ -47,12 +48,11 @@ const routes: Routes = [
 })
 export class AppModule {
   constructor(private keycloakService: KeycloakService) {
-    // Configure Keycloak on app startup
     this.keycloakService.configure({
-      url: 'https://aiuniversfs.ddns.net:5000',
-      realm: 'backend',
-      clientId: 'angular-app',
-      clientSecret: 'your-client-secret' // Only for confidential clients
+      url: environment.keycloak.url,
+      realm: environment.keycloak.realm,
+      clientId: environment.keycloak.clientId,
+      clientSecret: environment.keycloak.clientSecret
     });
   }
 }

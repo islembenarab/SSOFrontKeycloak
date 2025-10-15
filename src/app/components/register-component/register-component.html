@@ -19,9 +19,11 @@
             [class.error]="isFieldInvalid('firstName')"
             placeholder="Enter your first name"
           />
-          <div *ngIf="isFieldInvalid('firstName')" class="error-message">
-            {{ getFieldError('firstName') }}
-          </div>
+          @if (isFieldInvalid('firstName')) {
+            <div class="error-message">
+              {{ getFieldError('firstName') }}
+            </div>
+          }
         </div>
 
         <!-- Last Name -->
@@ -35,9 +37,11 @@
             [class.error]="isFieldInvalid('lastName')"
             placeholder="Enter your last name"
           />
-          <div *ngIf="isFieldInvalid('lastName')" class="error-message">
-            {{ getFieldError('lastName') }}
-          </div>
+          @if (isFieldInvalid('lastName')) {
+            <div class="error-message">
+              {{ getFieldError('lastName') }}
+            </div>
+          }
         </div>
       </div>
 
@@ -53,9 +57,11 @@
           placeholder="Choose a username"
           autocomplete="username"
         />
-        <div *ngIf="isFieldInvalid('username')" class="error-message">
-          {{ getFieldError('username') }}
-        </div>
+        @if (isFieldInvalid('username')) {
+          <div class="error-message">
+            {{ getFieldError('username') }}
+          </div>
+        }
       </div>
 
       <!-- Email -->
@@ -70,9 +76,11 @@
           placeholder="Enter your email address"
           autocomplete="email"
         />
-        <div *ngIf="isFieldInvalid('email')" class="error-message">
-          {{ getFieldError('email') }}
-        </div>
+        @if (isFieldInvalid('email')) {
+          <div class="error-message">
+            {{ getFieldError('email') }}
+          </div>
+        }
       </div>
 
       <!-- Password -->
@@ -87,9 +95,11 @@
           placeholder="Create a strong password"
           autocomplete="new-password"
         />
-        <div *ngIf="isFieldInvalid('password')" class="error-message">
-          {{ getFieldError('password') }}
-        </div>
+        @if (isFieldInvalid('password')) {
+          <div class="error-message">
+            {{ getFieldError('password') }}
+          </div>
+        }
       </div>
 
       <!-- Confirm Password -->
@@ -104,20 +114,26 @@
           placeholder="Confirm your password"
           autocomplete="new-password"
         />
-        <div *ngIf="isFieldInvalid('confirmPassword')" class="error-message">
-          {{ getFieldError('confirmPassword') }}
-        </div>
+        @if (isFieldInvalid('confirmPassword')) {
+          <div class="error-message">
+            {{ getFieldError('confirmPassword') }}
+          </div>
+        }
       </div>
 
       <!-- Success Message -->
-      <div *ngIf="successMessage" class="alert alert-success">
-        {{ successMessage }}
-      </div>
+      @if (successMessage) {
+        <div class="alert alert-success">
+          {{ successMessage }}
+        </div>
+      }
 
       <!-- Error Message -->
-      <div *ngIf="errorMessage" class="alert alert-error">
-        {{ errorMessage }}
-      </div>
+      @if (errorMessage) {
+        <div class="alert alert-error">
+          {{ errorMessage }}
+        </div>
+      }
 
       <!-- Submit Button -->
       <button
@@ -126,9 +142,13 @@
         [disabled]="loading"
         [class.loading]="loading"
       >
-        <span *ngIf="!loading">Create Account</span>
-        <span *ngIf="loading" class="spinner"></span>
-        <span *ngIf="loading">Creating Account...</span>
+        @if (!loading) {
+          <span>Create Account</span>
+        }
+        @if (loading) {
+          <span class="spinner"></span>
+          <span>Creating Account...</span>
+        }
       </button>
     </form>
 

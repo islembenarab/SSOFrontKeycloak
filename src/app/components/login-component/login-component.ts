@@ -1,9 +1,8 @@
 // login.component.ts
 import { Component, OnInit } from '@angular/core';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {Router, RouterLink} from '@angular/router';
+import {Router} from '@angular/router';
 import {KeycloakService, LoginCredentials} from '../../services/keycloak-service';
-import {NgIf} from '@angular/common';
 
 @Component({
   selector: 'app-login',

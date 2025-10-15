@@ -19,9 +19,11 @@
           placeholder="Enter your username"
           autocomplete="username"
         />
-        <div *ngIf="isFieldInvalid('username')" class="error-message">
-          {{ getFieldError('username') }}
-        </div>
+        @if (isFieldInvalid('username')) {
+          <div class="error-message">
+            {{ getFieldError('username') }}
+          </div>
+        }
       </div>
 
       <!-- Password Field -->
@@ -36,15 +38,19 @@
           placeholder="Enter your password"
           autocomplete="current-password"
         />
-        <div *ngIf="isFieldInvalid('password')" class="error-message">
-          {{ getFieldError('password') }}
-        </div>
+        @if (isFieldInvalid('password')) {
+          <div class="error-message">
+            {{ getFieldError('password') }}
+          </div>
+        }
       </div>
 
       <!-- Error Message -->
-      <div *ngIf="errorMessage" class="alert alert-error">
-        {{ errorMessage }}
-      </div>
+      @if (errorMessage) {
+        <div class="alert alert-error">
+          {{ errorMessage }}
+        </div>
+      }
 
       <!-- Submit Button -->
       <button
@@ -53,9 +59,13 @@
         [disabled]="loading"
         [class.loading]="loading"
       >
-        <span *ngIf="!loading">Sign In</span>
-        <span *ngIf="loading" class="spinner"></span>
-        <span *ngIf="loading">Signing In...</span>
+        @if (!loading) {
+          <span>Sign In</span>
+        }
+        @if (loading) {
+          <span class="spinner"></span>
+          <span>Signing In...</span>
+        }
       </button>
     </form>
 

@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, BehaviorSubject, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
+import {environment} from '../../environments/environment';
 
 export interface KeycloakConfig {
   url: string;
@@ -45,10 +46,10 @@ export interface TokenResponse {
 })
 export class KeycloakService {
   private config: KeycloakConfig = {
-    url: 'https://your-domain.com:8443',
-    realm: 'your-realm',
-    clientId: 'your-client-id',
-    clientSecret: 'your-client-secret' // Only needed for confidential clients
+    url: environment.keycloak.url,
+    realm: environment.keycloak.realm,
+    clientId: environment.keycloak.clientId,
+    clientSecret: environment.keycloak.clientSecret
   };
 
   private currentUserSubject = new BehaviorSubject<User | null>(null);
@@ -83,7 +84,7 @@ export class KeycloakService {
     body.set('client_id', this.config.clientId);
     body.set('username', credentials.username);
     body.set('password', credentials.password);
-
+    body.set('scope', 'openid profile email'); // Add scopes here
     if (this.config.clientSecret) {
       body.set('client_secret', this.config.clientSecret);
     }
@@ -135,19 +136,59 @@ export class KeycloakService {
    * Load user information using current token
    */
   private loadUserInfo(): void {
+    const token = this.getToken();
 
+    if (!token) {
+      console.error('No access token available');
+      return;
+    }
 
+    // Check if token is expired
+    if (this.isTokenExpired(token)) {
+      console.error('Access token is expired');
+      this.clearTokens();
+      return;
+    }
 
-    const userInfoUrl = `http://localhost:8080/users`;
+    // Keycloak userinfo endpoint
+    const userInfoUrl = `${this.config.url}/realms/${this.config.realm}/protocol/openid-connect/userinfo`;
 
     const headers = new HttpHeaders({
-      'Authorization': `Bearer ${this.getToken()}`
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
     });
 
-    this.http.get<User>(userInfoUrl, { headers }).subscribe(
-      user => this.currentUserSubject.next(user),
-      error => console.error('Failed to load user info:', error)
-    );
+    console.log('Fetching user info from:', userInfoUrl);
+    console.log('Using token:', token.substring(0, 20) + '...');
+
+    this.http.get<any>(userInfoUrl, { headers }).subscribe({
+      next: (userInfo) => {
+        console.log('User info received:', userInfo);
+
+        // Map Keycloak user info to your User interface
+        const user: User = {
+          id: userInfo.sub,
+          username: userInfo.preferred_username || userInfo.username,
+          email: userInfo.email,
+          firstName: userInfo.given_name,
+          lastName: userInfo.family_name,
+          enabled: true
+        };
+
+        this.currentUserSubject.next(user);
+      },
+      error: (error) => {
+        console.error('Failed to load user info:', error);
+        console.error('Error status:', error.status);
+        console.error('Error message:', error.message);
+
+        // If unauthorized, clear tokens
+        if (error.status === 401) {
+          console.error('Token is invalid or expired');
+          this.clearTokens();
+        }
+      }
+    });
   }
 
   /**
@@ -156,7 +197,7 @@ export class KeycloakService {
   refreshToken(): Observable<TokenResponse> {
     const refreshToken = localStorage.getItem('refresh_token');
     if (!refreshToken) {
-      return throwError('No refresh token available');
+      return throwError(()=> 'No refresh token available');
     }
 
     const tokenUrl = `${this.config.url}/realms/${this.config.realm}/protocol/openid-connect/token`;
@@ -185,7 +226,7 @@ export class KeycloakService {
         }),
         catchError(error => {
           this.logout();
-          return throwError(error);
+          return throwError(()=> error);
         })
       );
   }
@@ -218,7 +259,7 @@ export class KeycloakService {
           catchError(error => {
             console.error('Logout failed:', error);
             this.clearTokens(); // Clear tokens anyway
-            return throwError(error);
+            return throwError(()=> error);
           })
         );
     } else {
